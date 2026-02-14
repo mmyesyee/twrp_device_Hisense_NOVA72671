@@ -25,11 +25,6 @@ PRODUCT_AAPT_PREF_CONFIG := tvdpi
 PRODUCT_COPY_FILES += \
     $(DEVICE_PATH)/recovery.fstab:$(TARGET_RECOVERY_ROOT_OUT)/etc/recovery.fstab \
     $(DEVICE_PATH)/recovery/root/init.recovery.n00010.rc:$(TARGET_RECOVERY_ROOT_OUT)/init.recovery.n00010.rc
-    # 内核模块
-PRODUCT_COPY_FILES += \
-    $(wildcard $(DEVICE_PATH)/lib/modules/*.ko):$(TARGET_RECOVERY_ROOT_OUT)/lib/modules/ \
-    $(DEVICE_PATH)/lib/modules/tcon_data.bin:$(TARGET_RECOVERY_ROOT_OUT)/lib/modules/tcon_data.bin
-
 
 # 属性
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
