@@ -1,0 +1,70 @@
+on init
+
+    # Android creates by-name disk links with the disk controller
+    # in the generated path, so that the names pulled out of the GPT
+    # can be associated with the correct disk. Create a shortcut to
+    # /dev/block/by-name so that we can use the same fstabs everywhere.
+    symlink /dev/block/platform/fc048300.mmc/by-name /dev/block/by-name
+    mkdir /storage/sdcard0
+
+service watchdogd /sbin/nvt_recovery_rc_wdt /etc/nvt.ir.tk.ini
+    oneshot
+    seclabel u:r:watchdogd:s0
+
+service load_ta /bin/load_ta_sec /lib/modules/factory.epkg
+    oneshot
+    seclabel u:r:nvt_teec:s0
+
+# Reset the watchdog counter once boot is completed
+on property:init.svc.recovery=running
+    write /sys/devices/virtual/misc/watchdog/counter "0"
+
+on property:sys.nvt.check=1
+    insmod /lib/modules/kteeclient.ko
+    start load_ta
+
+on fs
+    setprop sys.nvt.check ${ro.nvt.secure_check}
+    insmod /lib/modules/PreTcon.ko
+    insmod /lib/modules/standalone_osd.ko gau32BufAddrSize=0x3de00000,0x02200000 gau32PlaneWinSize=1920,1080,1920,1080,256,256,256,256,256,256 gau32PlaneOrder=4,0 gu32NumOfBuffer=1 gu32FastLogoPlaneID=2
+    chown recovery recovery /dev/teec
+    chmod 0666 /dev/teec
+    insmod /lib/modules/ntkethmac.ko
+    insmod /lib/modules/ehci-hcd.ko
+    insmod /lib/modules/xhci-hcd.ko
+    insmod /lib/modules/xhci-nvt.ko
+    insmod /lib/modules/usb-storage.ko
+    insmod /lib/modules/usbhid.ko
+    insmod /lib/modules/usbtmc.ko
+    start bootlogo
+
+
+on boot
+    start console
+
+service bootlogo /sbin/bootlogo -p 0@/dev/ntkpaneldat -f 0@/dev/ntkpicture -s 0x400000 -t 3 -feature 0xfffffffc -m 0x1 -b 0x3de00000 0x02200000 -i 1 -p1 1920 1080 -p2 1920 1080 -p3 256 256
+    seclabel u:r:bootlogo:s0
+    oneshot
+
+service console /sbin/busybox ash
+    class core
+    console
+    seclabel u:r:shell:s0
+
+service eth_conf /sbin/busybox ash /sbin/ethconf.sh
+    user root
+    group root
+    oneshot
+    seclabel u:r:shell:s0
+
+###Hisense mahuihui 20200526 add start
+on property:sys.powerctl=*
+  start hsPowerCtrl
+
+service hsPowerCtrl /vendor/bin/hsPowerCtrl
+  class main
+  user root
+  group root
+  disabled
+  seclabel u:r:hsPowerCtrl:s0
+###Hisense mahuihui 20200526 add end
