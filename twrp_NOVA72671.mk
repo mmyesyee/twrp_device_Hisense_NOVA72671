@@ -6,6 +6,8 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/aosp_base.mk)
 $(call inherit-product, $(LOCAL_PATH)/device.mk)
 
 # 设备基本信息
+TARGET_COPY_OUT_VENDOR := vendor
+BOARD_BUILD_SYSTEM_ROOT_IMAGE := false
 PRODUCT_DEVICE := NOVA72671
 PRODUCT_NAME := twrp_NOVA72671
 PRODUCT_BRAND := Hisense
