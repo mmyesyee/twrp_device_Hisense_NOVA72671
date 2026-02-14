@@ -1,0 +1,1 @@
+# twrp_device_Hisense_NOVA72671
